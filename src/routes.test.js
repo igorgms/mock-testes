@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import App from './paginas/Principal/App';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
 import Cartoes from './componentes/Cartoes';
+import AppRoutes from './routes';
 
 describe('Rotas', () => {
   it('deve renderizar a rota principal ', () => {
@@ -13,6 +14,45 @@ describe('Rotas', () => {
   });
 
   it('deve renderizar a rota cartões ', () => {
-    render(<Cartoes />);
+    const rota = '/cartoes';
+
+    render(
+      <MemoryRouter initialEntries={[rota]}>
+        <Routes>
+          <Route path="/" element={<App />}>
+            <Route path="cartoes" element={<Cartoes />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const meusCartoes = screen.getByText('Meus cartões');
+    expect(meusCartoes).toHaveTextContent('Meus cartões');
+  });
+
+  it('deve renderizar a localização da rota atual ', () => {
+    const rota = '/cartoes';
+
+    render(
+      <MemoryRouter initialEntries={[rota]}>
+        <App />
+      </MemoryRouter>
+    );
+
+    const localizacaoAtual = screen.getByTestId('local');
+    expect(localizacaoAtual).toHaveTextContent(rota);
+  });
+
+  it('deve renderizar a página de erro ', () => {
+    const rota = '/extrato';
+
+    render(
+      <MemoryRouter initialEntries={[rota]}>
+        <AppRoutes />
+      </MemoryRouter>
+    );
+
+    const paginaErro = screen.getByTestId('pagina-404');
+    expect(paginaErro).toContainHTML('<h1>Ops! Não encontramos a página</h1>');
   });
 });
